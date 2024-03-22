@@ -71,13 +71,13 @@ public static class ExerciseManager
     static public string isValidNewName(string name)
     {
         //check if data initialized
-        if (exerciseData == null || exerciseData.exercises == null) 
+        if (exerciseData == null || exerciseData.exercises == null)
         {
             return "No database available";
         }
 
         //check if name has invalid number of characters
-        if (name.Length < 1 || name.Length > 30)
+        if (name.Length < 1 || name.Length > 28)
         {
             return "Wrong name length";
         }
@@ -92,5 +92,16 @@ public static class ExerciseManager
         return "Valid name";
     }
 
-    
+    public static void changeName(string nameOld, string nameNew)
+    {
+        foreach (Exercise exercise in ExerciseManager.exerciseData.exercises)
+        {
+            if (exercise.name == nameOld)
+            {
+                exercise.name = nameNew;
+                return;
+            }
+        }
+        SaveExerciseData();
+    }
 }

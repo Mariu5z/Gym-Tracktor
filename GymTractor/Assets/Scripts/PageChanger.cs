@@ -11,19 +11,19 @@ public class PageChanger : MonoBehaviour
 
     public void showInCanvas(string name)
     {
-        if (DataManager.invalidNameFlag) return;
+        //if (DataManager.invalidNameFlag) return;
         gameObject.transform.Find(name).gameObject.SetActive(true);
     }
 
     public void hideinCanvas(string name)
     {
-        if (DataManager.invalidNameFlag) return;
+        //if (DataManager.invalidNameFlag) return;
         gameObject.transform.Find(name).gameObject.SetActive(false);
     }
 
     public void changeCurrentPageNum(string name)
     {
-        if (DataManager.invalidNameFlag) return;
+        //if (DataManager.invalidNameFlag) return;
         currentPage = name;
     }
 
@@ -69,7 +69,7 @@ public class PageChanger : MonoBehaviour
         showInCanvas(currentPage);
     }
 
-    public void showExerciseStats()
+    public void goToExerciseStats()
     {
         hideinCanvas(currentPage);
         changeCurrentPageNum("Page23");
@@ -78,24 +78,14 @@ public class PageChanger : MonoBehaviour
     }
 
     //Adding, saving exercise ----------------------------------------
-    public void addNewExrcise()
+    public void goAddNewExrcise()
     {
         hideinCanvas(currentPage);
         changeCurrentPageNum("Page32");
         showInCanvas(currentPage);
     }
 
-    public void saveNewExrcise()
-    {
-        //funkcja spradzaj¹ca czy nazwa jest nie powtarzaj¹ca siê i w³aœciwa
-        //funkcja zamykaj¹ca tryb zapisywania (jeœli siê bêdzie chcia³o wyjœæ przed zapisywaniem wyskakuje okienko)
-        //funkcja zapiszuj¹ca do bazy danych
-        hideinCanvas(currentPage);
-        changeCurrentPageNum("Page31");
-        showInCanvas(currentPage);
-    }
-
-    public void chooseExercise()
+    public void goChooseExercise()
     {
         hideinCanvas(currentPage);
         changeCurrentPageNum("Page22");
