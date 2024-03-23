@@ -1,96 +1,110 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PageChanger : MonoBehaviour
 {
-    public bool isTraining = false;
-    public string currentPage = "Page11";
+    public static bool isTraining = false;
+    public static GameObject currentPage;
+    public static GameObject Page11;
+    public static GameObject Page12;
+    public static GameObject Page21;
+    public static GameObject Page22;
+    public static GameObject Page23;
+    public static GameObject Page31;
+    public static GameObject Page32;
 
-    public void showInCanvas(string name)
+    public void Start()
     {
-        //if (DataManager.invalidNameFlag) return;
-        gameObject.transform.Find(name).gameObject.SetActive(true);
+        Page11 = GameObject.Find("Page11");
+        currentPage = Page11;
+
+        Page12 = GameObject.Find("Page12");
+        Page12.SetActive(false);
+
+        Page21 = GameObject.Find("Page21");
+        Page21.SetActive(false);
+
+        Page22 = GameObject.Find("Page22");
+        Page22.SetActive(false);
+
+        Page23 = GameObject.Find("Page23");
+        Page23.SetActive(false);
+
+        Page31 = GameObject.Find("Page31");
+        Page31.SetActive(false);
+
+        Page32 = GameObject.Find("Page32");
+        Page32.SetActive(false);
     }
 
-    public void hideinCanvas(string name)
-    {
-        //if (DataManager.invalidNameFlag) return;
-        gameObject.transform.Find(name).gameObject.SetActive(false);
-    }
-
-    public void changeCurrentPageNum(string name)
-    {
-        //if (DataManager.invalidNameFlag) return;
-        currentPage = name;
-    }
 
     // Bottom Bar ------------------------------------------
-    public void goToStats()
+    public static void goToStats()
     {
-        hideinCanvas(currentPage);
-        changeCurrentPageNum("Page21");
-        showInCanvas(currentPage);
+        currentPage.SetActive(false);
+        currentPage = Page21;
+        currentPage.SetActive(true);
     }
 
-    public void goToTraining()
+    public static void goToTraining()
     {
-        hideinCanvas(currentPage);
-        if (isTraining) changeCurrentPageNum("Page12");
-        else changeCurrentPageNum("Page11");
-        showInCanvas(currentPage);
+        currentPage.SetActive(false);
+        if (isTraining) currentPage = Page12;
+        else currentPage = Page11;
+        currentPage.SetActive(true);
     }
 
-    public void goToExercises()
+    public static void goToExercises()
     {
-        hideinCanvas(currentPage);
-        changeCurrentPageNum("Page31");
-        showInCanvas(currentPage);
+        currentPage.SetActive(false);
+        currentPage = Page31;
+        currentPage.SetActive(true);
     }
 
     //Trening ------------------------------------------------
-    public void startTraining()
+    public static void startTraining()
     {
-        hideinCanvas(currentPage);
-        changeCurrentPageNum("Page12");
+        currentPage.SetActive(false);
+        currentPage = Page12;
         isTraining = true;
         //funkcja zaczynaj¹ca trening
-        showInCanvas(currentPage);
+        currentPage.SetActive(true);
     }
 
-    public void EndTraining()
+    public static void EndTraining()
     {
-        hideinCanvas(currentPage);
-        changeCurrentPageNum("Page11");
+        currentPage.SetActive(false);
+        currentPage = Page11;
         isTraining = false;
         //funkcja zapisuj¹ca nowe dane do pliku i zamykaj¹ca trening
-        showInCanvas(currentPage);
+        currentPage.SetActive(true);
     }
 
-    public void goToExerciseStats()
+    public static void goToExerciseStats()
     {
-        hideinCanvas(currentPage);
-        changeCurrentPageNum("Page23");
+        currentPage.SetActive(false);
+        currentPage = Page23;
         //funkcja przygotywuj¹ca i wyœwietlaj¹ca statystyki konretnego æwiczenia
-        showInCanvas(currentPage);
+        currentPage.SetActive(true);
     }
 
     //Adding, saving exercise ----------------------------------------
-    public void goAddNewExrcise()
+    public static void goAddNewExrcise()
     {
-        hideinCanvas(currentPage);
-        changeCurrentPageNum("Page32");
-        showInCanvas(currentPage);
+        currentPage.SetActive(false);
+        currentPage = Page32;
+        currentPage.SetActive(true);
     }
 
-    public void goChooseExercise()
+    public static void goChooseExercise()
     {
-        hideinCanvas(currentPage);
-        changeCurrentPageNum("Page22");
-        showInCanvas(currentPage);
-        //odpalanie trybu wybierania æwiczniea
+        currentPage.SetActive(false);
+        currentPage = Page22;
+        currentPage.SetActive(true);
     }
 
 

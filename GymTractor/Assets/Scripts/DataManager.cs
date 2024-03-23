@@ -27,20 +27,19 @@ public class DataManager : MonoBehaviour
     public static GameObject subMenuObject;
     public static GameObject subMenuName;
     static string currentExerciseName;
-    public GameObject page31Object;
     public GameObject subMenuRemove;
     public GameObject subMenuChangeName;
+    public GameObject chooseListContent;
+    public GameObject chooseListPrefab;
 
 
     void Start()
     {
         ExerciseManager.LoadExerciseData();
 
-        page31Object.SetActive(true);
         subMenuObject = GameObject.Find("SubMenu");
         subMenuName = GameObject.Find("SubMenuTitle");
         subMenuObject.SetActive(false);
-        page31Object.SetActive(false);
     }
 
     public void SaveNewExercise()
@@ -50,7 +49,7 @@ public class DataManager : MonoBehaviour
         {
             ExerciseManager.AddExercise(newExerciseName.text, isLoad.isOn, isReps.isOn, isTime.isOn);
             newExerciseName.text = "";
-            displayExerciseList(ExerciseManager.exerciseData.exercises);
+            displayExerciseList(ExerciseManager.exerciseData.exercises, prefabListElement, scrollbarExerciseContent);
             AddedNewExerciseMessage();
         }
         else
@@ -66,9 +65,8 @@ public class DataManager : MonoBehaviour
         invalidChangedName.SetActive(false);
     }
 
-    public void displayExerciseList(List<Exercise> exercises)
+    public void displayExerciseList(List<Exercise> exercises, GameObject prefab, GameObject parent)
     {
-        GameObject parent = scrollbarExerciseContent;
         //populating the list and sorting 
         List<string> names = new List<string>();
         foreach (Exercise exercise in exercises)
@@ -84,12 +82,12 @@ public class DataManager : MonoBehaviour
         }
 
         int deltaY = 100;
-        int contentHeight = 20;
+        int contentHeight = 0;
         //creating Text Element for each names and display in vertical list
         foreach (string name in names)
         {
             contentHeight += deltaY;
-            GameObject newPrefabInstance = Instantiate(prefabListElement, parent.transform);
+            GameObject newPrefabInstance = Instantiate(prefab, parent.transform);
             newPrefabInstance.name = name;
             RectTransform rectTransform = newPrefabInstance.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, -contentHeight);
@@ -103,20 +101,31 @@ public class DataManager : MonoBehaviour
 
     public void displayExerciseListAll()
     {
-        displayExerciseList(ExerciseManager.exerciseData.exercises);
+        displayExerciseList(ExerciseManager.exerciseData.exercises, prefabListElement, scrollbarExerciseContent);
     }
 
     public void displayExerciseListFiltered(string filter)
     {
         List<Exercise> displayed = ExerciseManager.exerciseData.exercises.FindAll(exercise => exercise.name.ToLower().StartsWith(filter));
-        displayExerciseList(displayed);
+        displayExerciseList(displayed, prefabListElement, scrollbarExerciseContent);
+    }
+
+    public void displayChooseExerciseAll()
+    {
+        displayExerciseList(ExerciseManager.exerciseData.exercises, chooseListPrefab, chooseListContent);
+    }
+
+    public void displayChooseExerciseFiltered(string filter)
+    {
+        List<Exercise> displayed = ExerciseManager.exerciseData.exercises.FindAll(exercise => exercise.name.ToLower().StartsWith(filter));
+        displayExerciseList(displayed, chooseListPrefab, chooseListContent);
     }
 
     public void removeExercise()
     {
         SubMenuRemoveEnd();
         ExerciseManager.RemoveExercise(currentExerciseName);
-        displayExerciseList(ExerciseManager.exerciseData.exercises);
+        displayExerciseList(ExerciseManager.exerciseData.exercises, prefabListElement, scrollbarExerciseContent);
     }
 
     public void changeNameExercise()
@@ -126,7 +135,7 @@ public class DataManager : MonoBehaviour
         {
             ExerciseManager.changeName(currentExerciseName, changedExerciseName.text);
             changedExerciseName.text = "";
-            displayExerciseList(ExerciseManager.exerciseData.exercises);
+            displayExerciseList(ExerciseManager.exerciseData.exercises, prefabListElement, scrollbarExerciseContent);
             SubMenuChangeNameEnd();
             SubMenuEnd();
         }

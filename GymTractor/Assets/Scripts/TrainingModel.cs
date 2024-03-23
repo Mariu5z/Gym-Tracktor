@@ -1,21 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
-using System.Diagnostics;
 
 
-
+[System.Serializable]
 public class TrainingData
 {
     public List<Training> trainings;
 }
 
+[System.Serializable]
 public class SetInfoData
 {
     public List<SetInfo> setsInfo;
 }
-
 
 [System.Serializable]
 public class Training
@@ -40,10 +38,19 @@ public class SetInfo
 }
 
 
-
-public static class GymTractorData
+public class TrainingModel : MonoBehaviour
 {
-    //static public string trainingFilePath = Application.persistentDataPath + "/TrainingsData.json";//file for storing data
-    //static public string setInfoFilePath = Application.persistentDataPath + "/SetsData.json";//file for storing data
+    static public string filePath = Application.persistentDataPath + "/TrainingsData.json";//file for storing data
+    TrainingData trainingData = new TrainingData();
 
+    //Load trainin data
+
+    //Save training data
+
+    //Add new training
+
+    //Add new SetInfo
+
+    //change exercise name in set info
+    
 }
