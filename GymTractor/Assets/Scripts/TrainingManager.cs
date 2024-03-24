@@ -4,24 +4,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System.Collections.Specialized;
+using System.Timers;
 
 public class TrainingManager : MonoBehaviour
 {
     //<ExerciseIndex, SetCount>
     public static Dictionary<int, int> setNumbers = new Dictionary<int, int>();
     public static Dictionary<int, string> exerciseNames = new Dictionary<int, string>();
-    public static int currentExerciseIndex;
+    public static int currentExerciseIndex = 0;
     public static bool newExerciseFlag = false;
     public static Exercise currentExercise;
     public GameObject trainingTime;
-    public GameObject excerciseName;
-    public GameObject excerciseAndSet;
+    public GameObject exerciseName;
+    public GameObject exerciseAndSet;
     public GameObject scrollViewContent;
     public GameObject prefabOneSet;
+    public static bool scrollingFlag = false;
+    public Vector2 currentContentPosition;
+    public GameObject scrollView;
+    public static int contentWidth = 980;//do optymalizacji
+    public static bool isTraining = false;
+    public static bool isTrainingStart = false;
+    public static float startTime;
+    public static float timer;
+    public int timerSeconds;
 
-    public static int contentWidth = 961; 
-
-
+    
 
     // Start is called before the first frame update
     void Start()
@@ -32,17 +40,33 @@ public class TrainingManager : MonoBehaviour
 
     void Update()
     {
+        if (isTrainingStart)
+        {
+            isTrainingStart = false;
+            startTime = Time.realtimeSinceStartup;//bedzie dzia³a³o nawet w backroundzie
+            timerSeconds = 0;
+            isTraining = true;
+        }
         //clock updating
-
-        //content œrodkuje siê
-
-        //w razie potrzeby currentExerciseIndex aktualizuje siê i z nim inne rzeczy
+        if (isTraining)
+        {
+            timer = Time.realtimeSinceStartup - startTime;
+            if ((int)timer != timerSeconds)
+            {
+                timerSeconds = (int)timer;
+                int seconds = timerSeconds % 60;
+                int minutes = (timerSeconds/60) % 60;
+                int hours = timerSeconds / 3600;
+                displayTime(seconds, minutes, hours);
+            }
+        }
 
         if (newExerciseFlag)
         {
             newExerciseFlag = false;
             addNewExercise();
         }
+
     }
 
     static void addNewExercise(string exerciseName, GameObject scrollViewContent, GameObject prefabOneSet, GameObject excerciseNameObject, GameObject excerciseAndSet)
@@ -80,7 +104,7 @@ public class TrainingManager : MonoBehaviour
 
     public void addNewExercise()
     {
-        addNewExercise(exerciseNames[currentExerciseIndex], scrollViewContent, prefabOneSet, excerciseName, excerciseAndSet);
+        addNewExercise(exerciseNames[currentExerciseIndex], scrollViewContent, prefabOneSet, exerciseName, exerciseAndSet);
     }
 
     public void addNewSet()
@@ -121,7 +145,7 @@ public class TrainingManager : MonoBehaviour
 
     public void removeSet()
     {
-        if (setNumbers[currentExerciseIndex] == 0) return;
+        if (setNumbers.Count == 0 || setNumbers[currentExerciseIndex] < 1) return;
         //pobierz wartoœæ currentIndex i ilosc serii
         string toRemove = currentExerciseIndex.ToString() + " " + setNumbers[currentExerciseIndex].ToString();
         setNumbers[currentExerciseIndex] -= 1;
@@ -133,6 +157,28 @@ public class TrainingManager : MonoBehaviour
                 Destroy(child.gameObject);
             }        
         }
+    }
+
+    public void removeAllSets()
+    {
+        setNumbers.Clear();
+        exerciseNames.Clear();
+        currentExerciseIndex = 0;
+        currentExercise = null;
+
+        RectTransform rectTransform = scrollViewContent.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = new Vector2(0, 0);
+        rectTransform.sizeDelta = new Vector2(0, rectTransform.sizeDelta.y);
+
+        foreach (Transform child in scrollViewContent.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        TextMeshProUGUI textComponent = exerciseName.GetComponent<TextMeshProUGUI>();
+        textComponent.text = "Add first exercise";
+        textComponent = exerciseAndSet.GetComponent<TextMeshProUGUI>();
+        textComponent.text = "0/0";
     }
 
     public void removeExercise()
@@ -153,31 +199,64 @@ public class TrainingManager : MonoBehaviour
         //jeœli nie by³o ostatnie to przesuñ dalsze elementy w content w lewo
     }
 
-    public void centerScroll(Vector2 contentPosition)
+    public void goToNext()
     {
-        float centerTime = 0.3f;
-        float startTime = Time.time;
-        float timer = 0f;
-        Vector2 destination = new Vector2(0f, 0f);
+        //jesli to ostatnie cwiczenie to nic nie rób
+        if (currentExerciseIndex == setNumbers.Count) return;
 
-        if (contentPosition.x % contentWidth < 0.5f * contentWidth)
+        currentExerciseIndex += 1;
+        RectTransform rectTransform = scrollViewContent.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x - contentWidth, rectTransform.anchoredPosition.y);
+
+        TextMeshProUGUI textComponent = exerciseName.GetComponent<TextMeshProUGUI>();
+        textComponent.text = exerciseNames[currentExerciseIndex];
+        textComponent = exerciseAndSet.GetComponent<TextMeshProUGUI>();
+        textComponent.text = currentExerciseIndex.ToString() + "/" + setNumbers.Count.ToString();
+    }
+
+    public void goToPrevious()
+    {
+        if (currentExerciseIndex < 2) return;
+
+        currentExerciseIndex -= 1;
+        RectTransform rectTransform = scrollViewContent.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x + contentWidth, rectTransform.anchoredPosition.y);
+
+        TextMeshProUGUI textComponent = exerciseName.GetComponent<TextMeshProUGUI>();
+        textComponent.text = exerciseNames[currentExerciseIndex];
+        textComponent = exerciseAndSet.GetComponent<TextMeshProUGUI>();
+        textComponent.text = currentExerciseIndex.ToString() + "/" + setNumbers.Count.ToString();
+    }
+
+    public void displayTime(int seconds, int minutes, int hours)
+    {
+        string s, min, h;
+        if (seconds < 10)
         {
-            destination.x = contentPosition.x - (contentPosition.x % contentWidth);// to Left
+            s = "0" + seconds.ToString();
         }
         else
         {
-            destination.x = contentPosition.x + (contentWidth - (contentPosition.x % contentWidth));
+            s = seconds.ToString();
         }
-        while (timer < centerTime)
+        if (minutes < 10)
         {
-            contentPosition = Vector2.Lerp(contentPosition, destination, timer/ centerTime);
-            timer = Time.time - startTime;
+            min = "0" + minutes.ToString();
         }
-    }
-
-    public void endTraining()
-    {
-        //to mo¿e byæ niez³e gówno
+        else
+        {
+            min = minutes.ToString();
+        }
+        if (hours < 10)
+        {
+            h = "0" + hours.ToString();
+        }
+        else
+        {
+            h = hours.ToString();
+        }
+        TextMeshProUGUI textComponent = trainingTime.GetComponent<TextMeshProUGUI>();
+        textComponent.text = h + ":" + min + ":" + s;
     }
 
 

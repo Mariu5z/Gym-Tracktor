@@ -7,7 +7,6 @@ using UnityEngine.UI;
 
 public class PageChanger : MonoBehaviour
 {
-    public static bool isTraining = false;
     public static GameObject currentPage;
     public static GameObject Page11;
     public static GameObject Page12;
@@ -53,7 +52,7 @@ public class PageChanger : MonoBehaviour
     public static void goToTraining()
     {
         currentPage.SetActive(false);
-        if (isTraining) currentPage = Page12;
+        if (TrainingManager.isTraining) currentPage = Page12;
         else currentPage = Page11;
         currentPage.SetActive(true);
     }
@@ -70,7 +69,7 @@ public class PageChanger : MonoBehaviour
     {
         currentPage.SetActive(false);
         currentPage = Page12;
-        isTraining = true;
+        TrainingManager.isTrainingStart = true;
         //funkcja zaczynaj¹ca trening
         currentPage.SetActive(true);
     }
@@ -79,7 +78,7 @@ public class PageChanger : MonoBehaviour
     {
         currentPage.SetActive(false);
         currentPage = Page11;
-        isTraining = false;
+        TrainingManager.isTraining = false;
         //funkcja zapisuj¹ca nowe dane do pliku i zamykaj¹ca trening
         currentPage.SetActive(true);
     }
