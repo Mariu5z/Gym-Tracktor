@@ -22,20 +22,26 @@ public class TrainingManager : MonoBehaviour
     public static bool scrollingFlag = false;
     public Vector2 currentContentPosition;
     public GameObject scrollView;
-    public static int contentWidth = 980;//do optymalizacji
+    public static int contentWidth;//do optymalizacji
     public static bool isTraining = false;
     public static bool isTrainingStart = false;
     public static float startTime;
     public static float timer;
     public int timerSeconds;
+    public GameObject SubMenuObject;
+    public GameObject labelSet;
+    public GameObject labelReps;
+    public GameObject labelLoad;
+    public GameObject labelTime;
+    public GameObject labelDone;
 
-    
 
     // Start is called before the first frame update
     void Start()
     {
         RectTransform rectTransform = scrollViewContent.GetComponent<RectTransform>();
         rectTransform.anchoredPosition = new Vector2(0, 0);
+        contentWidth = (int)((Screen.width) * (1920f/Screen.height)) - 100;
     }
 
     void Update()
@@ -87,6 +93,7 @@ public class TrainingManager : MonoBehaviour
         newPrefabInstance.name = currentExerciseIndex.ToString() + " 1";
         rectTransform = newPrefabInstance.GetComponent<RectTransform>();
         rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x + (currentExerciseIndex - 1) * contentWidth, rectTransform.anchoredPosition.y);
+        rectTransform.sizeDelta = new Vector2(contentWidth , rectTransform.sizeDelta.y);
         //dostosuj ten prefab (niektóre rzeczy trzeba mo¿e wygasiæ)
         if (!currentExercise.onReps)
         {
@@ -105,6 +112,7 @@ public class TrainingManager : MonoBehaviour
     public void addNewExercise()
     {
         addNewExercise(exerciseNames[currentExerciseIndex], scrollViewContent, prefabOneSet, exerciseName, exerciseAndSet);
+        adjustSetLabel();
     }
 
     public void addNewSet()
@@ -126,6 +134,7 @@ public class TrainingManager : MonoBehaviour
         newPrefabInstance.name = currentExerciseIndex.ToString() + " " + setNumbers[currentExerciseIndex].ToString();
         RectTransform rectTransform = newPrefabInstance.GetComponent<RectTransform>();
         rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x + (currentExerciseIndex - 1) * contentWidth, rectTransform.anchoredPosition.y - 100 * (setNumbers[currentExerciseIndex]-1));
+        rectTransform.sizeDelta = new Vector2(contentWidth, rectTransform.sizeDelta.y);
         //dostosuj ten prefab
         TextMeshProUGUI textComponent = newPrefabInstance.transform.Find("Set").gameObject.GetComponent<TextMeshProUGUI>();
         textComponent.text = setNumbers[currentExerciseIndex].ToString() + ".";
@@ -183,20 +192,63 @@ public class TrainingManager : MonoBehaviour
 
     public void removeExercise()
     {
-        //trudniejsza funkcja ale trzeba j¹ zrobiæ
+        
         //jeœli nie ma æwiczeñ
         if (setNumbers.Count == 0) return;
-        //usuñ prefaby z odpowiedni¹ nazw¹
+
+        RectTransform rectTransform;
         foreach (Transform child in scrollViewContent.transform)
         {
+            //usuñ prefaby z odpowiedni¹ nazw¹
             if (child.name.StartsWith(currentExerciseIndex.ToString()))
             {
                 Destroy(child.gameObject);
             }
+
+            int exeNr = (int)char.GetNumericValue(child.name[0]);
+            //przesuñ dalsze prefaby w lewo i zmieñ ich nazwê
+            if (exeNr > currentExerciseIndex)
+            {
+                rectTransform = child.gameObject.GetComponent<RectTransform>();
+                rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x - contentWidth, rectTransform.anchoredPosition.y);
+                child.name = (exeNr-1).ToString() + child.name.Substring(1);
+            }
         }
-        //zaaktualizuj s³owniki, aktualne æwiczenie, napisy, content area
-        //jeœli to by³o ostatnie æwiczenie to przesuñ content position w lewo (chyba ¿e by³o pierwsze)
-        //jeœli nie by³o ostatnie to przesuñ dalsze elementy w content w lewo
+
+        //zaaktualizuj s³owniki, aktualne æwiczenie
+        for (int i = currentExerciseIndex; i < setNumbers.Count; i++)
+        {
+            setNumbers[i] = setNumbers[i + 1];
+            exerciseNames[i] = exerciseNames[i + 1];
+        }
+        if (currentExerciseIndex == exerciseNames.Count)
+        {
+            currentExerciseIndex -= 1;
+        }
+        setNumbers.Remove(setNumbers.Count);
+        exerciseNames.Remove(exerciseNames.Count);
+        //napisy
+        if (currentExerciseIndex == 0)
+        {
+            TextMeshProUGUI textComponent = exerciseName.GetComponent<TextMeshProUGUI>();
+            textComponent.text = "Add first exercise";
+            textComponent = exerciseAndSet.GetComponent<TextMeshProUGUI>();
+            textComponent.text = "0/0";
+        }
+        else
+        {
+            TextMeshProUGUI textComponent = exerciseName.GetComponent<TextMeshProUGUI>();
+            textComponent.text = exerciseNames[currentExerciseIndex];
+            textComponent = exerciseAndSet.GetComponent<TextMeshProUGUI>();
+            textComponent.text = currentExerciseIndex.ToString()+"/"+setNumbers.Count.ToString();
+        }
+        //content area
+        rectTransform = scrollViewContent.GetComponent<RectTransform>();
+        rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x - contentWidth, rectTransform.sizeDelta.y);
+        rectTransform.anchoredPosition = new Vector2(-(currentExerciseIndex - 1) * contentWidth, rectTransform.anchoredPosition.y);
+        
+        adjustSetLabel();
+        subMenuEnd();
     }
 
     public void goToNext()
@@ -205,6 +257,8 @@ public class TrainingManager : MonoBehaviour
         if (currentExerciseIndex == setNumbers.Count) return;
 
         currentExerciseIndex += 1;
+        currentExercise = ExerciseManager.exerciseData.exercises.Find(exercise => exercise.name.ToLower() == exerciseNames[currentExerciseIndex].ToLower());
+
         RectTransform rectTransform = scrollViewContent.GetComponent<RectTransform>();
         rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x - contentWidth, rectTransform.anchoredPosition.y);
 
@@ -212,6 +266,8 @@ public class TrainingManager : MonoBehaviour
         textComponent.text = exerciseNames[currentExerciseIndex];
         textComponent = exerciseAndSet.GetComponent<TextMeshProUGUI>();
         textComponent.text = currentExerciseIndex.ToString() + "/" + setNumbers.Count.ToString();
+
+        adjustSetLabel();
     }
 
     public void goToPrevious()
@@ -219,6 +275,8 @@ public class TrainingManager : MonoBehaviour
         if (currentExerciseIndex < 2) return;
 
         currentExerciseIndex -= 1;
+        currentExercise = ExerciseManager.exerciseData.exercises.Find(exercise => exercise.name.ToLower() == exerciseNames[currentExerciseIndex].ToLower());
+
         RectTransform rectTransform = scrollViewContent.GetComponent<RectTransform>();
         rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x + contentWidth, rectTransform.anchoredPosition.y);
 
@@ -226,6 +284,8 @@ public class TrainingManager : MonoBehaviour
         textComponent.text = exerciseNames[currentExerciseIndex];
         textComponent = exerciseAndSet.GetComponent<TextMeshProUGUI>();
         textComponent.text = currentExerciseIndex.ToString() + "/" + setNumbers.Count.ToString();
+
+        adjustSetLabel();
     }
 
     public void displayTime(int seconds, int minutes, int hours)
@@ -259,8 +319,43 @@ public class TrainingManager : MonoBehaviour
         textComponent.text = h + ":" + min + ":" + s;
     }
 
+    public void subMenuStart()
+    {
+        if (currentExerciseIndex == 0) return;
+        SubMenuObject.SetActive(true);
+    }
 
+    public void subMenuEnd()
+    {
+        SubMenuObject.SetActive(false);
+    }
 
+    public void adjustSetLabel()
+    {
+        if (currentExerciseIndex > 0)
+        {
+            labelSet.SetActive(true);
+            labelDone.SetActive(true);
+        }
+        else 
+        {
+            labelSet.SetActive(false);
+            labelDone.SetActive(false);
+            labelReps.SetActive(false);
+            labelLoad.SetActive(false);
+            labelTime.SetActive(false);
+            return;
+        }
+
+        if (currentExercise.onReps == true) labelReps.SetActive(true);
+        else labelReps.SetActive(false);
+
+        if (currentExercise.onLoad == true) labelLoad.SetActive(true);
+        else labelLoad.SetActive(false);
+
+        if (currentExercise.onTime == true) labelTime.SetActive(true);
+        else labelTime.SetActive(false);
+    }
 
 
 
