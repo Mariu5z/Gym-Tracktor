@@ -5,6 +5,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Specialized;
 using System.Timers;
+using System.Globalization;
 
 public class TrainingManager : MonoBehaviour
 {
@@ -34,6 +35,7 @@ public class TrainingManager : MonoBehaviour
     public GameObject labelLoad;
     public GameObject labelTime;
     public GameObject labelDone;
+    
 
 
     // Start is called before the first frame update
@@ -168,6 +170,64 @@ public class TrainingManager : MonoBehaviour
         }
     }
 
+    public void saveAllTraining()
+    {
+        //termin treningu
+        // Get the current date and time
+        System.DateTime now = System.DateTime.Now;
+        int weekOfYear = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(now, CalendarWeekRule.FirstDay, System.DayOfWeek.Monday);
+        //duration of the training
+        int minutes = (timerSeconds / 60) % 60;
+        //saving training
+        TrainingModel.addNewTrainingData(now.Day, weekOfYear, now.Month, now.Year, minutes);
+        //index of the training
+
+        for (int i = 1; i <= setNumbers.Count; i++)
+        {
+            for (int j = 1; j <= setNumbers[i]; j++)
+            {
+                //default values
+                float load = -1f;
+                int reps = -1;
+                int time = -1;
+                //getting inputs
+                string current  = i.ToString() + " " + j.ToString();
+                GameObject setGameObject = scrollViewContent.transform.Find(current).gameObject;
+                GameObject gameObject = setGameObject.transform.Find("Reps").gameObject;
+                if (gameObject != null)
+                {
+                    TMP_InputField inputField = gameObject.GetComponent<TMP_InputField>();
+                    string inputText = inputField.text;
+                    if (!string.IsNullOrEmpty(inputText) && !inputText.StartsWith("-"))
+                    {
+                        reps = int.Parse(inputText);
+                    }
+                }
+                gameObject = setGameObject.transform.Find("Load").gameObject;
+                if (gameObject != null)
+                {
+                    TMP_InputField inputField = gameObject.GetComponent<TMP_InputField>();
+                    string inputText = inputField.text;
+                    if (!string.IsNullOrEmpty(inputText) && !inputText.StartsWith("-") && inputText != "," && inputText != ".")
+                    {
+                        load = float.Parse(inputText);
+                    }
+                }
+                gameObject = setGameObject.transform.Find("Time").gameObject;
+                if (gameObject != null)
+                {
+                    TMP_InputField inputField = gameObject.GetComponent<TMP_InputField>();
+                    string inputText = inputField.text;
+                    if (!string.IsNullOrEmpty(inputText) && !inputText.StartsWith("-"))
+                    {
+                        time = int.Parse(inputText);
+                    }
+                }
+                TrainingModel.addNewSetInfoData(exerciseNames[i], load, reps, time);
+            }
+        }
+    }
+
     public void removeAllSets()
     {
         setNumbers.Clear();
@@ -195,6 +255,7 @@ public class TrainingManager : MonoBehaviour
         
         //jeœli nie ma æwiczeñ
         if (setNumbers.Count == 0) return;
+        //zastanów siê nad innymi warunkami skoñczenia tej funkcji
 
         RectTransform rectTransform;
         foreach (Transform child in scrollViewContent.transform)
@@ -246,10 +307,12 @@ public class TrainingManager : MonoBehaviour
         rectTransform = scrollViewContent.GetComponent<RectTransform>();
         rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x - contentWidth, rectTransform.sizeDelta.y);
         rectTransform.anchoredPosition = new Vector2(-(currentExerciseIndex - 1) * contentWidth, rectTransform.anchoredPosition.y);
-        
+
         adjustSetLabel();
         subMenuEnd();
     }
+
+
 
     public void goToNext()
     {
