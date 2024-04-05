@@ -14,14 +14,19 @@ public class Statistics : MonoBehaviour
     public GameObject GeneralStatsContent;
     public GameObject GeneralStatsPrefab;
     public TMP_Dropdown GeneralStatsDropdown;
+    public TMP_Dropdown ExerciseStatsPeriods;
+    public TMP_Dropdown ExerciseStatsMode;
     public static string currentExercise;
     public static int periods = 0;
     public static int mode = 0;
     public static bool displayExerciseStatsFlag = false;
-    public GameObject exerciseName;
+    public GameObject exerciseNameObject;
     public GameObject statsLabelReps;
     public GameObject statsLabelLoad;
     public GameObject statsLabelTime;
+    public GameObject exerciseStatsPrefab;
+    public GameObject exerciseStatsContent;
+    List<string> months = new List<string> { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "nov", "oct", "dec" };
 
     void Start()
     {
@@ -111,7 +116,6 @@ public class Statistics : MonoBehaviour
         string periods;
         string thisPeriod;
         List<Training> trainings = new();
-        List<string> months = new List<string> { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "nov", "oct", "dec" };
         int yDelta = 80;
         int yPosition = yDelta;
         RectTransform rectTransform;
@@ -229,13 +233,25 @@ public class Statistics : MonoBehaviour
 
     public void displayExerciseStats(string exerciseName, int periods, int mode)
     {
-        TextMeshProUGUI textComponent = this.exerciseName.GetComponent<TextMeshProUGUI>();
+        TextMeshProUGUI textComponent = exerciseNameObject.GetComponent<TextMeshProUGUI>();
         textComponent.text = exerciseName;
+        GameObject gameObject;
+        RectTransform rectTransform;
+        int yDelta = 80;
+        int yPosition = 0;
+        int rowLimit = 20;
+        string thisPeriod = "-";
+        List<SetInfo> sets = new List<SetInfo>();
+        List<int> trainings = new List<int>();
 
         Exercise exercise = ExerciseManager.exerciseData.exercises
             .Where(ex => ex.name == exerciseName)
             .SingleOrDefault();
 
+        System.DateTime dateTime = System.DateTime.Now;
+        int weekOfYear = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstDay, System.DayOfWeek.Monday);
+
+        //widocznoœæ nag³ówków
         if (exercise.onReps) statsLabelReps.SetActive(true);
         else statsLabelReps.SetActive(false);
         if (exercise.onLoad) statsLabelLoad.SetActive(true);
@@ -243,8 +259,168 @@ public class Statistics : MonoBehaviour
         if (exercise.onTime) statsLabelTime.SetActive(true);
         else statsLabelTime.SetActive(false);
 
+        //wyczyœæ ostatnio wyœwietlane
+        foreach (Transform child in exerciseStatsContent.transform)
+        {
+            Destroy(child.gameObject);
+        }
 
+        Debug.Log(periods + " "+ mode);
 
+        for (int i = 0; i < rowLimit; i++)
+        {
+            //getting sets within that period with this exercise
+            if (periods == 0)
+            {
+                //days
+                trainings = TrainingModel.trainingData.trainings
+                    .Where(training => training.yearNumber == dateTime.Year && training.monthNumber == dateTime.Month && training.dayNumber == dateTime.Day)
+                    .Select(training => training.trainingIndex)
+                    .ToList();
+                thisPeriod = dateTime.Day.ToString() + " " + months[dateTime.Month - 1];
+                dateTime = dateTime.AddDays(-1);
+            }
+            else if (periods == 1)
+            {
+                //weeks
+                trainings = TrainingModel.trainingData.trainings
+                    .Where(training => training.yearNumber == dateTime.Year && training.weekNumber == weekOfYear)
+                    .Select(training => training.trainingIndex)
+                    .ToList();
+                thisPeriod = "week " + weekOfYear.ToString();
+                dateTime = dateTime.AddDays(-7);
+                weekOfYear = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstDay, System.DayOfWeek.Monday);
+            }
+            else if (periods == 2)
+            {
+                //months
+                trainings = TrainingModel.trainingData.trainings
+                    .Where(training => training.yearNumber == dateTime.Year && training.monthNumber == dateTime.Month)
+                    .Select(training => training.trainingIndex)
+                    .ToList();
+                thisPeriod = months[dateTime.Month - 1] + " " + dateTime.Year.ToString();
+                dateTime = dateTime.AddMonths(-1);
+            }
+            else if (periods == 3)
+            {
+                //years
+                trainings = TrainingModel.trainingData.trainings
+                    .Where(training => training.yearNumber == dateTime.Year)
+                    .Select(training => training.trainingIndex)
+                    .ToList();
+                thisPeriod = dateTime.Year.ToString();
+                dateTime = dateTime.AddYears(-1);
+            }
+
+            sets = TrainingModel.setInfoData.setsInfo
+                    .Where(set => trainings.Contains(set.setIndex))
+                    .Where(set => set.exerciseName == exercise.name)
+                    .ToList();
+            float setCount = sets.Count;
+            float repsStats = -1f;
+            float loadStats = -1f;
+            float timeStats = -1f;
+
+            //policz statystyki
+            if (mode == 0)
+            {
+                //sum
+                repsStats = (float)sets.Sum(set => set.reps);
+                if (exercise.onReps)
+                {
+                    loadStats = sets.Sum(set => set.reps * set.load);
+                    timeStats = (float)sets.Sum(set => set.reps * set.time);
+                }
+                else
+                {
+                    loadStats = sets.Sum(set => set.load);
+                    timeStats = (float)sets.Sum(set => set.time);
+                }
+            }
+            else if(mode == 1 && setCount != 0f)
+            {
+                //average         
+                float RepCount = (float)sets.Sum(set => set.reps);
+                repsStats = RepCount / setCount;
+
+                if (exercise.onReps && RepCount != 0f)
+                {
+                    loadStats = sets.Sum(set => set.reps * set.load) / RepCount;
+                    timeStats = sets.Sum(set => set.reps * set.time) / RepCount;
+                }
+                else
+                {
+                    loadStats = sets.Sum(set => set.load) / setCount;
+                    timeStats = sets.Sum(set => set.time) / setCount;
+                }
+            }
+            else if (mode == 2 && sets.Count != 0f)
+            {
+                //max
+                repsStats = (float)sets.Max(set => set.reps);
+                loadStats = sets.Max(set => set.load);
+                timeStats = (float)sets.Max(set => set.time);
+            }
+
+            //wstawienie prefab
+            GameObject newPrefabInstance = Instantiate(exerciseStatsPrefab, exerciseStatsContent.transform);
+            //widocznoœæ elementów prefab i edycja tekstów
+            gameObject = newPrefabInstance.transform.Find("Period").gameObject;
+            textComponent = gameObject.GetComponent<TextMeshProUGUI>();
+            textComponent.text = thisPeriod;
+
+            gameObject = newPrefabInstance.transform.Find("Sets").gameObject;
+            textComponent = gameObject.GetComponent<TextMeshProUGUI>();
+            textComponent.text = setCount.ToString();
+
+            gameObject = newPrefabInstance.transform.Find("Reps").gameObject;
+            if (exercise.onReps)
+            {
+                textComponent = gameObject.GetComponent<TextMeshProUGUI>();
+                textComponent.text = repsStats.ToString();
+            }
+            else gameObject.SetActive(false);
+
+            gameObject = newPrefabInstance.transform.Find("Load").gameObject;
+            if (exercise.onLoad) 
+            {
+                textComponent = gameObject.GetComponent<TextMeshProUGUI>();
+                textComponent.text = loadStats.ToString() + "kg";
+            }
+            else gameObject.SetActive(false);
+
+            gameObject = newPrefabInstance.transform.Find("Time").gameObject;
+            if (exercise.onTime) 
+            {
+                textComponent = gameObject.GetComponent<TextMeshProUGUI>();
+                textComponent.text = timeStats.ToString() + "s";
+            }
+            else gameObject.SetActive(false);
+            //pozycja prefab
+            rectTransform = newPrefabInstance.GetComponent<RectTransform>();
+            rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, yPosition);
+            yPosition -= yDelta;
+
+            //pierwszy trening tego æwiczenia, jeœli data wczeœniejsza to koñcz pêtla
+
+        }
+
+        //zwieksz content area
+        rectTransform = exerciseStatsContent.GetComponent<RectTransform>();
+        rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, -yPosition);
+
+    }
+
+    public void dropdownPeriodsChanged(int dropDown)
+    {
+        periods = dropDown;
+        displayExerciseStatsFlag = true;
+    }
+
+    public void dropdownModeChanged(int dropDown)
+    {
+        mode = dropDown;
+        displayExerciseStatsFlag = true;
     }
 
 }

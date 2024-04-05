@@ -5091,7 +5091,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Content: {fileID: 1785638650}
   m_Horizontal: 0
-  m_Vertical: 0
+  m_Vertical: 1
   m_MovementType: 2
   m_Elasticity: 0.1
   m_Inertia: 0
@@ -6961,7 +6961,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -8517,7 +8517,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -8689,7 +8689,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -9212,7 +9212,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2012321424}
         m_TargetAssemblyTypeName: Statistics, Assembly-CSharp
-        m_MethodName: displayGeneralStats
+        m_MethodName: dropdownModeChanged
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9507,7 +9507,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -13126,7 +13126,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -13652,7 +13652,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -18222,7 +18222,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -21966,7 +21966,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2012321424}
         m_TargetAssemblyTypeName: Statistics, Assembly-CSharp
-        m_MethodName: displayGeneralStats
+        m_MethodName: dropdownPeriodsChanged
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -22807,7 +22807,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1612466943}
         m_TargetAssemblyTypeName: PageChanger, Assembly-CSharp
-        m_MethodName: chooseExercise
+        m_MethodName: goChooseExercise
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -22946,7 +22946,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -24672,10 +24672,14 @@ MonoBehaviour:
   GeneralStatsContent: {fileID: 668877891}
   GeneralStatsPrefab: {fileID: 799793304578266318, guid: 87c21d0952a8dc546813f13d2a8be5a8, type: 3}
   GeneralStatsDropdown: {fileID: 342771657}
-  exerciseName: {fileID: 158572865}
+  ExerciseStatsPeriods: {fileID: 1831619655}
+  ExerciseStatsMode: {fileID: 669282517}
+  exerciseNameObject: {fileID: 158572865}
   statsLabelReps: {fileID: 654801463}
   statsLabelLoad: {fileID: 1878630924}
   statsLabelTime: {fileID: 702460732}
+  exerciseStatsPrefab: {fileID: 9005931700515002895, guid: 0090975e5f1dc3d45a351514192f9b82, type: 3}
+  exerciseStatsContent: {fileID: 1785638649}
 --- !u!4 &2012321425
 Transform:
   m_ObjectHideFlags: 0
@@ -24749,7 +24753,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Stats of Exercise: '
+  m_text: Stats of Exercise
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -24776,8 +24780,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 50
-  m_fontSizeBase: 50
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 0
@@ -25639,7 +25643,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
