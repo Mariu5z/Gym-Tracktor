@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 
 [System.Serializable]
@@ -26,8 +27,9 @@ public class Training
     public int weekNumber;
     public int monthNumber;
     public int yearNumber;
+    public int setCount;
 
-    public Training(int index, int time, int day, int week, int month, int year)
+    public Training(int index, int time, int day, int week, int month, int year, int sets)
     {
         trainingIndex = index;
         trainingTime = time;
@@ -35,6 +37,7 @@ public class Training
         weekNumber = week;
         monthNumber = month;
         yearNumber = year;
+        setCount = sets;
     }
 
 }
@@ -58,7 +61,7 @@ public static class TrainingModel
     public static TrainingData trainingData;
     public static SetInfoData setInfoData;
 
-    public static void loadTrainingData ()
+    public static void loadTrainingData()
     {
         if (File.Exists(TrainingFilePath))
         {
@@ -102,10 +105,15 @@ public static class TrainingModel
     }
 
     //Add new training
-    public static void addNewTrainingData(int day, int week, int month, int year, int minutes)
+    public static void addNewTrainingData(int day, int week, int month, int year, int minutes, int sets)
     {
         loadTrainingData();
-        Training training = new Training(trainingData.trainings.Count + 1, minutes, day, week, month, year);
+        int lastTrainingIndex = trainingData.trainings
+        .Select(training => training.trainingIndex)
+        .DefaultIfEmpty(0)
+        .Max();
+
+        Training training = new Training(lastTrainingIndex + 1, minutes, day, week, month, year, sets);
         trainingData.trainings.Add(training);
         saveData(TrainingFilePath, trainingData);
     }
@@ -114,11 +122,20 @@ public static class TrainingModel
     {
         loadTrainingData();
         loadSetData();
+        int lastSetIndex = setInfoData.setsInfo
+        .Select(set => set.setIndex)
+        .DefaultIfEmpty(0)
+        .Max();
+
+        int lastTrainingIndex = trainingData.trainings
+        .Select(training => training.trainingIndex)
+        .DefaultIfEmpty(0)
+        .Max();
 
         SetInfo setInfo = new SetInfo
         {
-            setIndex = setInfoData.setsInfo.Count + 1,//primary key
-            trainingIndex = trainingData.trainings.Count,
+            setIndex = lastSetIndex + 1,//primary key
+            trainingIndex = lastTrainingIndex,
             exerciseName = exercise,
             load = load,
             reps = reps,
@@ -126,6 +143,24 @@ public static class TrainingModel
         };
 
         setInfoData.setsInfo.Add(setInfo);
+        saveData(SetInfoFilePath, setInfoData);
+    }
+
+    public static void removeExerciseFromSets(string exercise)
+    {
+        setInfoData.setsInfo.RemoveAll(set => set.exerciseName == exercise);
+        saveData(SetInfoFilePath, setInfoData);
+    }
+
+    public static void changeExerciseNameInSets(string oldName, string newName)
+    {
+        foreach (SetInfo setInfo in TrainingModel.setInfoData.setsInfo)
+        {
+            if (setInfo.exerciseName == oldName)
+            {
+                setInfo.exerciseName = newName;
+            }
+        }
         saveData(SetInfoFilePath, setInfoData);
     }
 

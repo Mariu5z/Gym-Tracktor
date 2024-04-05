@@ -31,16 +31,8 @@ public class DataManager : MonoBehaviour
     public GameObject subMenuChangeName;
     public GameObject chooseListContent;
     public GameObject chooseListPrefab;
+    public GameObject chooseListStatsPrefab;
 
-
-    void Start()
-    {
-        ExerciseManager.LoadExerciseData();
-
-        subMenuObject = GameObject.Find("SubMenu");
-        subMenuName = GameObject.Find("SubMenuTitle");
-        subMenuObject.SetActive(false);
-    }
 
     public void SaveNewExercise()
     {
@@ -115,6 +107,11 @@ public class DataManager : MonoBehaviour
         displayExerciseList(ExerciseManager.exerciseData.exercises, chooseListPrefab, chooseListContent);
     }
 
+    public void displayChooseExerciseForStats()
+    {
+        displayExerciseList(ExerciseManager.exerciseData.exercises, chooseListStatsPrefab, chooseListContent);
+    }
+
     public void displayChooseExerciseFiltered(string filter)
     {
         List<Exercise> displayed = ExerciseManager.exerciseData.exercises.FindAll(exercise => exercise.name.ToLower().StartsWith(filter));
@@ -124,6 +121,7 @@ public class DataManager : MonoBehaviour
     public void removeExercise()
     {
         SubMenuRemoveEnd();
+        TrainingModel.removeExerciseFromSets(currentExerciseName);
         ExerciseManager.RemoveExercise(currentExerciseName);
         displayExerciseList(ExerciseManager.exerciseData.exercises, prefabListElement, scrollbarExerciseContent);
     }
@@ -133,6 +131,7 @@ public class DataManager : MonoBehaviour
         string nameCheck = ExerciseManager.isValidNewName(changedExerciseName.text);
         if (nameCheck == "Valid name")
         {
+            TrainingModel.changeExerciseNameInSets(currentExerciseName, changedExerciseName.text);
             ExerciseManager.changeName(currentExerciseName, changedExerciseName.text);
             changedExerciseName.text = "";
             displayExerciseList(ExerciseManager.exerciseData.exercises, prefabListElement, scrollbarExerciseContent);

@@ -98,10 +98,10 @@ public static class ExerciseManager
         {
             if (exercise.name == nameOld)
             {
-                exercise.name = nameNew;
+                exercise.name = nameNew; 
+                SaveExerciseData();
                 return;
             }
         }
-        SaveExerciseData();
     }
 }

@@ -18,6 +18,10 @@ public class PageChanger : MonoBehaviour
 
     public void Start()
     {
+        DataManager.subMenuObject = GameObject.Find("SubMenu");
+        DataManager.subMenuName = GameObject.Find("SubMenuTitle");
+        DataManager.subMenuObject.SetActive(false);
+
         Page11 = GameObject.Find("Page11");
         currentPage = Page11;
 

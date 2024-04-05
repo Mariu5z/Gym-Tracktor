@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 //using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using System.Collections.Specialized;
 using System.Timers;
@@ -35,7 +36,9 @@ public class TrainingManager : MonoBehaviour
     public GameObject labelLoad;
     public GameObject labelTime;
     public GameObject labelDone;
-    
+    public GameObject EmptyFieldMenu;
+    public Statistics statistics;
+    public GameObject NotMarkedMenu;
 
 
     // Start is called before the first frame update
@@ -170,59 +173,155 @@ public class TrainingManager : MonoBehaviour
         }
     }
 
+    public void endTrainingButton()
+    {
+        if (isSomethingNotMarked())
+        {
+            NotMarkedMenu.SetActive(true);
+        }
+        else if (isEmptyFields())
+        {
+            EmptyFieldMenu.SetActive(true);
+        }
+        else 
+        {
+            endTraining();
+        }
+    }
+
+    public bool isEmptyFields()
+    {
+        for (int i = 1; i <= setNumbers.Count; i++)
+        {
+            for (int j = 1; j <= setNumbers[i]; j++)
+            {
+                if (isEmptyField(i, j, "Reps")) return true;
+                if (isEmptyField(i, j, "Load")) return true;
+                if (isEmptyField(i, j, "Time")) return true;
+            }
+        }
+        return false;
+    }
+
+    public bool isEmptyField(int exercise, int set, string category)
+    {
+        string current = exercise.ToString() + " " + set.ToString();
+        GameObject setGameObject = scrollViewContent.transform.Find(current).gameObject;
+        GameObject gameObject = setGameObject.transform.Find(category).gameObject;
+        if (gameObject == null || !gameObject.activeSelf) 
+        {
+            return false;
+        }
+        else
+        {
+            TMP_InputField inputField = gameObject.GetComponent<TMP_InputField>();
+            string inputText = inputField.text;
+            if (string.IsNullOrEmpty(inputText) || inputText.StartsWith("-") || inputText == "," || inputText == ".") 
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool isSomethingNotMarked()
+    {
+        for (int i = 1; i <= setNumbers.Count; i++)
+        {
+            for (int j = 1; j <= setNumbers[i]; j++)
+            {
+                string current = i.ToString() + " " + j.ToString();
+                GameObject setGameObject = scrollViewContent.transform.Find(current).gameObject;
+                GameObject gameObject = setGameObject.transform.Find("isDone").gameObject;
+                Toggle toggle = gameObject.GetComponent<Toggle>();
+                if (toggle.isOn == false) return true;
+            }
+        }
+        return false;
+    }
+
     public void saveAllTraining()
     {
+        //dont save if ther isnt any exercises
+        if (currentExerciseIndex == 0)
+        {
+            return;
+        }
+
         //termin treningu
         // Get the current date and time
         System.DateTime now = System.DateTime.Now;
         int weekOfYear = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(now, CalendarWeekRule.FirstDay, System.DayOfWeek.Monday);
         //duration of the training
         int minutes = (timerSeconds / 60) % 60;
+        //number of sets
+        int sets = 0;
+        foreach (var kvp in setNumbers)
+        {
+            sets += kvp.Value;
+        }
         //saving training
-        TrainingModel.addNewTrainingData(now.Day, weekOfYear, now.Month, now.Year, minutes);
-        //index of the training
+        TrainingModel.addNewTrainingData(now.Day, weekOfYear, now.Month, now.Year, minutes, sets);
+        
 
+        //saving all sets in the training
         for (int i = 1; i <= setNumbers.Count; i++)
         {
             for (int j = 1; j <= setNumbers[i]; j++)
             {
-                //default values
-                float load = -1f;
-                int reps = -1;
-                int time = -1;
+                GameObject gameObject;
+                float load;
+                int reps;
+                int time;
                 //getting inputs
-                string current  = i.ToString() + " " + j.ToString();
+                string current = i.ToString() + " " + j.ToString();
                 GameObject setGameObject = scrollViewContent.transform.Find(current).gameObject;
-                GameObject gameObject = setGameObject.transform.Find("Reps").gameObject;
-                if (gameObject != null)
+
+                gameObject = setGameObject.transform.Find("Reps").gameObject;
+                if (gameObject == null || !gameObject.activeSelf)
+                {
+                    reps = -1;
+                }
+                else if (isEmptyField(i, j, "Reps"))
+                {
+                    reps = 0;
+                }
+                else
                 {
                     TMP_InputField inputField = gameObject.GetComponent<TMP_InputField>();
-                    string inputText = inputField.text;
-                    if (!string.IsNullOrEmpty(inputText) && !inputText.StartsWith("-"))
-                    {
-                        reps = int.Parse(inputText);
-                    }
+                    reps = int.Parse(inputField.text);
                 }
+
                 gameObject = setGameObject.transform.Find("Load").gameObject;
-                if (gameObject != null)
+                if (gameObject == null || !gameObject.activeSelf)
+                {
+                    load = -1f;
+                }
+                else if (isEmptyField(i, j, "Load"))
+                {
+                    load = 0f;
+                }
+                else
                 {
                     TMP_InputField inputField = gameObject.GetComponent<TMP_InputField>();
-                    string inputText = inputField.text;
-                    if (!string.IsNullOrEmpty(inputText) && !inputText.StartsWith("-") && inputText != "," && inputText != ".")
-                    {
-                        load = float.Parse(inputText);
-                    }
+                    load = float.Parse(inputField.text);
                 }
+
                 gameObject = setGameObject.transform.Find("Time").gameObject;
-                if (gameObject != null)
+                if (gameObject == null || !gameObject.activeSelf)
+                {
+                    time = -1;
+                }
+                else if (isEmptyField(i, j, "Time"))
+                {
+                    time = 0;
+                }
+                else
                 {
                     TMP_InputField inputField = gameObject.GetComponent<TMP_InputField>();
-                    string inputText = inputField.text;
-                    if (!string.IsNullOrEmpty(inputText) && !inputText.StartsWith("-"))
-                    {
-                        time = int.Parse(inputText);
-                    }
+                    time = int.Parse(inputField.text);
                 }
+
                 TrainingModel.addNewSetInfoData(exerciseNames[i], load, reps, time);
             }
         }
@@ -311,8 +410,6 @@ public class TrainingManager : MonoBehaviour
         adjustSetLabel();
         subMenuEnd();
     }
-
-
 
     public void goToNext()
     {
@@ -420,6 +517,29 @@ public class TrainingManager : MonoBehaviour
         else labelTime.SetActive(false);
     }
 
+    public void EmptyFieldMenuEnd()
+    {
+        EmptyFieldMenu.SetActive(false);
+    }
 
+    public void endTraining()
+    {
+        PageChanger.EndTraining();
+        saveAllTraining();
+        removeAllSets();
+        statistics.displayWhenLastTime();
+    }
+
+    public void cancelTraining()
+    {
+        EmptyFieldMenu.SetActive(false);
+        PageChanger.EndTraining();
+        removeAllSets();
+    }
+
+    public void NotMarkedMenuEnd()
+    {
+        NotMarkedMenu.SetActive(false);
+    }
 
 }

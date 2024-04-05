@@ -27,4 +27,12 @@ public class SubMenuExercise : MonoBehaviour
         PageChanger.goToTraining();
     }
 
+    public void chooseExerciseForStats()
+    {
+        title = gameObject.transform.parent.gameObject.name;
+        PageChanger.goToExerciseStats();
+        Statistics.currentExercise = title;
+        Statistics.displayExerciseStatsFlag = true;
+    }
+
 }
