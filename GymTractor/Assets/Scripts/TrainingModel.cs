@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Linq;
-
+using System.Globalization;
 
 [System.Serializable]
 public class TrainingData
 {
+    public int startDay;
+    public int startMonth;
+    public int startYear;
     public List<Training> trainings;
 }
 
@@ -58,6 +61,7 @@ public static class TrainingModel
 {
     public static string TrainingFilePath = Application.persistentDataPath + "/TrainingsData.json";//file for storing data
     public static string SetInfoFilePath = Application.persistentDataPath + "/SetsData.json";//file for storing data
+    public static string startDateFilePath = Application.persistentDataPath + "/startDate.json";//file for storing data
     public static TrainingData trainingData;
     public static SetInfoData setInfoData;
 
@@ -65,16 +69,17 @@ public static class TrainingModel
     {
         if (File.Exists(TrainingFilePath))
         {
-            //Debug.Log("Training File exists");
             //Debug.Log(TrainingFilePath);
             string json = File.ReadAllText(TrainingFilePath);
             trainingData = JsonUtility.FromJson<TrainingData>(json);
         }
         else
         {
-            //Debug.Log("Training File doesnt exists");
             trainingData = new TrainingData();
             trainingData.trainings = new();
+            trainingData.startDay = System.DateTime.Now.Day;
+            trainingData.startMonth = System.DateTime.Now.Month;
+            trainingData.startYear = System.DateTime.Now.Year;
             saveData(TrainingFilePath, trainingData);
         }
     }
@@ -83,13 +88,11 @@ public static class TrainingModel
     {
         if (File.Exists(SetInfoFilePath))
         {
-            //Debug.Log("Set File exists");
             string json = File.ReadAllText(SetInfoFilePath);
             setInfoData = JsonUtility.FromJson<SetInfoData>(json);
         }
         else
         {
-            //Debug.Log("Set File doesnt exists");
             //Debug.Log(SetInfoFilePath);
             setInfoData = new SetInfoData();
             setInfoData.setsInfo = new();
@@ -97,17 +100,37 @@ public static class TrainingModel
         }
     }
 
+    /*
+    public static void loadStartDate()
+    {
+        if (File.Exists(startDateFilePath))
+        {
+            string json = File.ReadAllText(startDateFilePath);
+            startDate = JsonUtility.FromJson<System.DateTime>(json);
+        }
+        else
+        {
+            startDate = System.DateTime.Now;
+            saveData(startDateFilePath, startDate);
+        }
+        Debug.Log(startDate.Day);
+        Debug.Log(startDate.Month);
+        Debug.Log(startDate.Year);
+    }
+    */
+
     //Save training data
     public static void saveData<T>(string filepath, T data)
     {
         string json = JsonUtility.ToJson(data);
         File.WriteAllText(filepath, json);
+        //Debug.Log("Data saved");
     }
 
     //Add new training
     public static void addNewTrainingData(int day, int week, int month, int year, int minutes, int sets)
     {
-        loadTrainingData();
+        //loadTrainingData();
         int lastTrainingIndex = trainingData.trainings
         .Select(training => training.trainingIndex)
         .DefaultIfEmpty(0)
@@ -120,8 +143,8 @@ public static class TrainingModel
 
     public static void addNewSetInfoData(string exercise, float load, int reps, int time)
     {
-        loadTrainingData();
-        loadSetData();
+        //loadTrainingData();
+        //loadSetData();
         int lastSetIndex = setInfoData.setsInfo
         .Select(set => set.setIndex)
         .DefaultIfEmpty(0)

@@ -38,15 +38,18 @@ public static class ExerciseManager
         else
         {
             exerciseData = new ExerciseData();
+            exerciseData.exercises = new();
             //Debug.Log("File doesnt exists");
             SaveExerciseData();
         }
+        //Debug.Log("exercise data loaded");
     }
 
     static public void SaveExerciseData()
     {
         string json = JsonUtility.ToJson(exerciseData);
         File.WriteAllText(filePath, json);
+        //Debug.Log("exercise data saved");
     }
 
     static public void AddExercise(string name, bool onLoad, bool onReps, bool onTime)

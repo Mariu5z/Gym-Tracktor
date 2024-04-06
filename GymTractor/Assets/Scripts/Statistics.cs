@@ -119,6 +119,9 @@ public class Statistics : MonoBehaviour
         int yDelta = 80;
         int yPosition = yDelta;
         RectTransform rectTransform;
+        int firstYear = TrainingModel.trainingData.startYear;
+        int firstMonth = TrainingModel.trainingData.startMonth;
+        int firstDay = TrainingModel.trainingData.startDay;
 
         if (dropDown == 0) periods = "days";
         else if (dropDown == 1) periods = "weeks";
@@ -132,21 +135,6 @@ public class Statistics : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-
-        int firstYear = TrainingModel.trainingData.trainings
-        .OrderBy(training => training.trainingIndex)
-        .Select(training => training.yearNumber)
-        .FirstOrDefault();
-
-        int firstMonth = TrainingModel.trainingData.trainings
-        .OrderBy(training => training.trainingIndex)
-        .Select(training => training.monthNumber)
-        .FirstOrDefault();
-
-        int firstDay = TrainingModel.trainingData.trainings
-        .OrderBy(training => training.trainingIndex)
-        .Select(training => training.dayNumber)
-        .FirstOrDefault();
 
         for (int i = 0; i < rowLimit; i++)
         {
@@ -215,7 +203,6 @@ public class Statistics : MonoBehaviour
             rectTransform = newPrefabInstance.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, yPosition);
 
-
             if (firstYear > dateTime.Year) break;
             else if (firstYear == dateTime.Year && firstMonth > dateTime.Month) break;
             else if (firstYear == dateTime.Year && firstMonth == dateTime.Month && firstDay > dateTime.Day) break;
@@ -264,8 +251,6 @@ public class Statistics : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-
-        Debug.Log(periods + " "+ mode);
 
         for (int i = 0; i < rowLimit; i++)
         {
