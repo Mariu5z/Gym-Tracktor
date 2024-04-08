@@ -40,7 +40,6 @@ public class DataManager : MonoBehaviour
         if (nameCheck == "Valid name" )
         {
             ExerciseManager.AddExercise(newExerciseName.text, isLoad.isOn, isReps.isOn, isTime.isOn);
-            newExerciseName.text = "";
             displayExerciseList(ExerciseManager.exerciseData.exercises, prefabListElement, scrollbarExerciseContent);
             AddedNewExerciseMessage();
         }
@@ -187,6 +186,23 @@ public class DataManager : MonoBehaviour
     public void AddedNewExerciseMessageOff()
     {
         validNewName.SetActive(false);
+    }
+
+    public void clearInputField()
+    {
+        if (validNewName.activeSelf)
+        {
+            newExerciseName.text = "";
+        }
+    }
+
+    public void statsOfExercise()
+    {
+        TextMeshProUGUI textComponent = subMenuName.GetComponent<TextMeshProUGUI>();
+        Statistics.currentExercise = textComponent.text;
+        Statistics.mode = 1;
+        Statistics.periods = 0;
+        Statistics.displayExerciseStatsFlag = true;
     }
 
 }

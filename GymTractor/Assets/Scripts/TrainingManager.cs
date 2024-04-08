@@ -39,6 +39,9 @@ public class TrainingManager : MonoBehaviour
     public GameObject EmptyFieldMenu;
     public Statistics statistics;
     public GameObject NotMarkedMenu;
+    public static bool addingNewExcersise = false;
+    public TMP_InputField newExerciseName;
+    public GameObject validNewName;
 
 
     // Start is called before the first frame update
@@ -540,6 +543,45 @@ public class TrainingManager : MonoBehaviour
     public void NotMarkedMenuEnd()
     {
         NotMarkedMenu.SetActive(false);
+    }
+
+    public void addingNewExerciseInTrainingStart()
+    {
+        if (isTraining)
+        {
+            addingNewExcersise = true;
+        }
+    }
+
+    public void addingNewExerciseInTrainingStop()
+    {
+        addingNewExcersise = false;
+    }
+
+    public void addingNewExerciseInTraining()
+    {
+        if (validNewName.activeSelf && addingNewExcersise)
+        {
+            setNumbers[setNumbers.Count + 1] = 1;
+            exerciseNames[exerciseNames.Count + 1] = newExerciseName.text;
+            currentExerciseIndex = setNumbers.Count;
+            currentExercise = ExerciseManager.exerciseData.exercises.Find(exercise => exercise.name.ToLower() == newExerciseName.text.ToLower());
+            addNewExercise(newExerciseName.text, scrollViewContent, prefabOneSet, exerciseName, exerciseAndSet);
+            adjustSetLabel();
+            addingNewExcersise = false;
+            validNewName.SetActive(false);
+            PageChanger.goToTraining();
+        }
+    }
+
+    public void statsInTraining()
+    {
+        SubMenuObject.SetActive(false);
+        Statistics.currentExercise = exerciseNames[currentExerciseIndex];
+        Statistics.mode = 1;
+        Statistics.periods = 0;
+        Statistics.displayExerciseStatsFlag = true;
+        PageChanger.goToExerciseStats();
     }
 
 }

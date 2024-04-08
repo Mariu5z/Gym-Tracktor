@@ -100,25 +100,6 @@ public static class TrainingModel
         }
     }
 
-    /*
-    public static void loadStartDate()
-    {
-        if (File.Exists(startDateFilePath))
-        {
-            string json = File.ReadAllText(startDateFilePath);
-            startDate = JsonUtility.FromJson<System.DateTime>(json);
-        }
-        else
-        {
-            startDate = System.DateTime.Now;
-            saveData(startDateFilePath, startDate);
-        }
-        Debug.Log(startDate.Day);
-        Debug.Log(startDate.Month);
-        Debug.Log(startDate.Year);
-    }
-    */
-
     //Save training data
     public static void saveData<T>(string filepath, T data)
     {
@@ -185,6 +166,14 @@ public static class TrainingModel
             }
         }
         saveData(SetInfoFilePath, setInfoData);
+    }
+
+    public static bool isBeforeStartDate(int Day, int Month, int Year)
+    {
+        if (trainingData.startYear > Year) return true;
+        else if (trainingData.startYear == Year && trainingData.startMonth > Month) return true;
+        else if (trainingData.startYear == Year && trainingData.startMonth == Month && trainingData.startDay > Day) return true;
+        else return false;
     }
 
 }

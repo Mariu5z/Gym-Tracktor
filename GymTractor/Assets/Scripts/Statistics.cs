@@ -34,6 +34,9 @@ public class Statistics : MonoBehaviour
         TrainingModel.loadTrainingData();
         TrainingModel.loadSetData();
 
+        RectTransform rectTransform = GeneralStatsContent.transform.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, 0);
+
         displayWhenLastTime();
     }
 
@@ -110,18 +113,15 @@ public class Statistics : MonoBehaviour
         }
     }
 
-    public void displayGeneralStats(int dropDown)
+    public void displayGeneralStats(int dropDown) 
     {
         int rowLimit = 20;
         string periods;
         string thisPeriod;
         List<Training> trainings = new();
         int yDelta = 80;
-        int yPosition = yDelta;
+        int yPosition = 0;
         RectTransform rectTransform;
-        int firstYear = TrainingModel.trainingData.startYear;
-        int firstMonth = TrainingModel.trainingData.startMonth;
-        int firstDay = TrainingModel.trainingData.startDay;
 
         if (dropDown == 0) periods = "days";
         else if (dropDown == 1) periods = "weeks";
@@ -203,19 +203,16 @@ public class Statistics : MonoBehaviour
             rectTransform = newPrefabInstance.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, yPosition);
 
-            if (firstYear > dateTime.Year) break;
-            else if (firstYear == dateTime.Year && firstMonth > dateTime.Month) break;
-            else if (firstYear == dateTime.Year && firstMonth == dateTime.Month && firstDay > dateTime.Day) break;
-
+            if (TrainingModel.isBeforeStartDate(dateTime.Day, dateTime.Month, dateTime.Year)) break;
         }
 
         rectTransform = GeneralStatsContent.GetComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(rectTransform.anchoredPosition.x, - yPosition + yDelta);
+        rectTransform.sizeDelta = new Vector2(rectTransform.anchoredPosition.x, - yPosition);
     }
 
     public void displayGeneralStatsDef()
     {
-        GeneralStatsDropdown.value = 0;
+        displayGeneralStats(GeneralStatsDropdown.value);
     }
 
     public void displayExerciseStats(string exerciseName, int periods, int mode)
@@ -298,13 +295,17 @@ public class Statistics : MonoBehaviour
             }
 
             sets = TrainingModel.setInfoData.setsInfo
-                    .Where(set => trainings.Contains(set.setIndex))
                     .Where(set => set.exerciseName == exercise.name)
+                    .Where(set => trainings.Contains(set.trainingIndex))
                     .ToList();
+
             float setCount = sets.Count;
             float repsStats = -1f;
             float loadStats = -1f;
             float timeStats = -1f;
+            string repsText = "-";
+            string loadText = "-";
+            string timeText = "-";
 
             //policz statystyki
             if (mode == 0)
@@ -321,13 +322,15 @@ public class Statistics : MonoBehaviour
                     loadStats = sets.Sum(set => set.load);
                     timeStats = (float)sets.Sum(set => set.time);
                 }
+                repsText = repsStats.ToString("0");
+                loadText = loadStats.ToString("0") +"kg";
+                timeText = timeStats.ToString("0") + "s";    
             }
             else if(mode == 1 && setCount != 0f)
             {
                 //average         
                 float RepCount = (float)sets.Sum(set => set.reps);
                 repsStats = RepCount / setCount;
-
                 if (exercise.onReps && RepCount != 0f)
                 {
                     loadStats = sets.Sum(set => set.reps * set.load) / RepCount;
@@ -338,13 +341,20 @@ public class Statistics : MonoBehaviour
                     loadStats = sets.Sum(set => set.load) / setCount;
                     timeStats = sets.Sum(set => set.time) / setCount;
                 }
+                repsText = repsStats.ToString("0.0");
+                loadText = loadStats.ToString("0.0") + "kg";
+                timeText = timeStats.ToString("0.0") + "s";
             }
+
             else if (mode == 2 && sets.Count != 0f)
             {
                 //max
                 repsStats = (float)sets.Max(set => set.reps);
                 loadStats = sets.Max(set => set.load);
                 timeStats = (float)sets.Max(set => set.time);
+                repsText = repsStats.ToString("0");
+                loadText = loadStats.ToString("0.0") +"kg";
+                timeText = timeStats.ToString("0") + "s";
             }
 
             //wstawienie prefab
@@ -362,7 +372,7 @@ public class Statistics : MonoBehaviour
             if (exercise.onReps)
             {
                 textComponent = gameObject.GetComponent<TextMeshProUGUI>();
-                textComponent.text = repsStats.ToString();
+                textComponent.text = repsText;
             }
             else gameObject.SetActive(false);
 
@@ -370,7 +380,7 @@ public class Statistics : MonoBehaviour
             if (exercise.onLoad) 
             {
                 textComponent = gameObject.GetComponent<TextMeshProUGUI>();
-                textComponent.text = loadStats.ToString() + "kg";
+                textComponent.text = loadText;
             }
             else gameObject.SetActive(false);
 
@@ -378,7 +388,7 @@ public class Statistics : MonoBehaviour
             if (exercise.onTime) 
             {
                 textComponent = gameObject.GetComponent<TextMeshProUGUI>();
-                textComponent.text = timeStats.ToString() + "s";
+                textComponent.text = timeText;
             }
             else gameObject.SetActive(false);
             //pozycja prefab
@@ -387,7 +397,7 @@ public class Statistics : MonoBehaviour
             yPosition -= yDelta;
 
             //pierwszy trening tego æwiczenia, jeœli data wczeœniejsza to koñcz pêtla
-
+            if (TrainingModel.isBeforeStartDate(dateTime.Day, dateTime.Month, dateTime.Year)) break;
         }
 
         //zwieksz content area
@@ -407,5 +417,6 @@ public class Statistics : MonoBehaviour
         mode = dropDown;
         displayExerciseStatsFlag = true;
     }
+
 
 }
