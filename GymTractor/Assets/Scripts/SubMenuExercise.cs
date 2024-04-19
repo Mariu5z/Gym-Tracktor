@@ -1,15 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-// System.Diagnostics;
-
-//using System.Diagnostics;
 using UnityEngine;
-using UnityEngine.UI;
 
+//this class is used in prefabs in dynamic lists to obtain information of this specific prefab and use it in application
 public class SubMenuExercise : MonoBehaviour
 {
     public string title;
 
+    //opening subMenu in Page 31
     public void SubMenuStart()
     {
         title = gameObject.transform.parent.gameObject.name;

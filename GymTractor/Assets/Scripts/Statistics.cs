@@ -46,6 +46,8 @@ public class Statistics : MonoBehaviour
         {
             displayExerciseStatsFlag = false;
             //wykonaj funkcje
+            ExerciseStatsPeriods.SetValueWithoutNotify(periods);
+            ExerciseStatsMode.SetValueWithoutNotify(mode);
             displayExerciseStats(currentExercise, periods, mode);
         }
     }

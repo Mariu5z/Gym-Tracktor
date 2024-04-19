@@ -1,10 +1,7 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
-using UnityEngine.UI;
 
+
+//this class is used for jumping between pages of application
 public class PageChanger : MonoBehaviour
 {
     public static GameObject currentPage;
@@ -15,37 +12,23 @@ public class PageChanger : MonoBehaviour
     public static GameObject Page23;
     public static GameObject Page31;
     public static GameObject Page32;
+    public AssignObjects objects;
 
     public void Start()
     {
-        DataManager.subMenuObject = GameObject.Find("SubMenu");
-        DataManager.subMenuName = GameObject.Find("SubMenuTitle");
-        DataManager.subMenuObject.SetActive(false);
+        Page11 = objects.Page11;
+        Page12 = objects.Page12;
+        Page21 = objects.Page21;
+        Page22 = objects.Page22;
+        Page23 = objects.Page23;
+        Page31 = objects.Page31;
+        Page32 = objects.Page32;
 
-        Page11 = GameObject.Find("Page11");
         currentPage = Page11;
-
-        Page12 = GameObject.Find("Page12");
-        Page12.SetActive(false);
-
-        Page21 = GameObject.Find("Page21");
-        Page21.SetActive(false);
-
-        Page22 = GameObject.Find("Page22");
-        Page22.SetActive(false);
-
-        Page23 = GameObject.Find("Page23");
-        Page23.SetActive(false);
-
-        Page31 = GameObject.Find("Page31");
-        Page31.SetActive(false);
-
-        Page32 = GameObject.Find("Page32");
-        Page32.SetActive(false);
     }
 
 
-    // Bottom Bar ------------------------------------------
+    // functions to jumping 
     public static void goToStats()
     {
         currentPage.SetActive(false);
@@ -68,7 +51,6 @@ public class PageChanger : MonoBehaviour
         currentPage.SetActive(true);
     }
 
-    //Trening ------------------------------------------------
     public static void startTraining()
     {
         currentPage.SetActive(false);
@@ -95,7 +77,6 @@ public class PageChanger : MonoBehaviour
         currentPage.SetActive(true);
     }
 
-    //Adding, saving exercise ----------------------------------------
     public static void goAddNewExrcise()
     {
         currentPage.SetActive(false);
@@ -109,8 +90,5 @@ public class PageChanger : MonoBehaviour
         currentPage = Page22;
         currentPage.SetActive(true);
     }
-
-
-
 
 }

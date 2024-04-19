@@ -388,6 +388,14 @@ public class TrainingManager : MonoBehaviour
         {
             currentExerciseIndex -= 1;
         }
+        if (currentExerciseIndex != 0)
+        {
+            currentExercise = ExerciseManager.exerciseData.exercises.Find(exercise => exercise.name.ToLower() == exerciseNames[currentExerciseIndex].ToLower());
+        }
+        else
+        {
+            currentExercise = null;
+        }
         setNumbers.Remove(setNumbers.Count);
         exerciseNames.Remove(exerciseNames.Count);
         //napisy

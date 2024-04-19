@@ -32,6 +32,14 @@ public class DataManager : MonoBehaviour
     public GameObject chooseListContent;
     public GameObject chooseListPrefab;
     public GameObject chooseListStatsPrefab;
+    public AssignObjects objects;
+    
+    void Start()
+    {
+        subMenuObject = objects.subMenu;
+        subMenuName = objects.subMenuName;
+    } 
+
 
 
     public void SaveNewExercise()
